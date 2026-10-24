@@ -1,0 +1,30 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Juicy Bouncy - lactose-free gelatinas in cups and molds / gelatinas sin lactosa en vaso y en molde"><title>Completa tu pedido | Juicy Bouncy</title><link rel="stylesheet" href="../style.css"></head><body><header class="header"><a class="logo" href="index.html">Juicy Bouncy</a><nav><a href="index.html">Inicio</a><a href="shop.html">Tienda</a><a href="about.html">Nosotros</a><a href="contact.html">Contacto</a><a href="payments.html">Pagos</a><a href="../index.html">🌐 Español / English</a></nav></header><main><div class="page-title"><p class="eyebrow">JUICY BOUNCY</p><h1>Completa tu pedido</h1><p>Dinos a dónde quieres que te llegue tu gelatina.</p></div>
+<section class="card"><p class="eyebrow">Tu producto</p><h2 id="productName">Loading...</h2><p>Precio: <strong id="productPrice">$0.00</strong></p></section>
+<section class="card"><form action="https://formsubmit.co/edgarlopezcoapio@gmail.com" method="POST">
+<input type="hidden" name="_subject" value="New Juicy Bouncy Order"><input type="hidden" name="_template" value="table"><input type="hidden" name="_captcha" value="false">
+<input type="hidden" name="_next" value="thanks.html">
+<input type="hidden" id="productInput" name="Product"><input type="hidden" id="priceInput" name="Price">
+<label>Tu nombre<input type="text" name="Name" required></label>
+<label>Tu correo<input type="email" name="Email" required></label>
+<label>Tu mensaje<textarea name="Message" rows="4"></textarea></label>
+<button class="btn" type="submit">Enviar mensaje</button></form></section>
+<script>
+const products = {
+      "Vaso de Fresa": { price: "3.99", paypal: "" },
+      "Vaso de Mango": { price: "3.99", paypal: "" },
+      "Vaso de Chocolate": { price: "4.49", paypal: "" },
+      "Vaso Compartido de Fresa": { price: "8.99", paypal: "" },
+      "Vaso Compartido de Mango": { price: "8.99", paypal: "" },
+      "Molde de Fresa para Eventos": { price: "55.00", paypal: "" },
+      "Molde de Mango para Eventos": { price: "55.00", paypal: "" },
+      "Molde Tres Leches para Eventos": { price: "65.00", paypal: "" }
+};
+const params = new URLSearchParams(window.location.search);
+const selectedProduct = params.get("product");
+if (!selectedProduct || !products[selectedProduct]) { window.location.href = "shop.html"; }
+const product = products[selectedProduct];
+document.getElementById("productName").textContent = selectedProduct;
+document.getElementById("productPrice").textContent = "$" + product.price;
+document.getElementById("productInput").value = selectedProduct;
+document.getElementById("priceInput").value = "$" + product.price;
+</script></main><footer class="footer"><a class="logo logo2" href="index.html">Juicy Bouncy</a><p>Gelatinas pequeñas hechas para rebotar.</p><p>© <span class="year"></span> Juicy Bouncy</p></footer><script src="../script.js"></script></body></html>
