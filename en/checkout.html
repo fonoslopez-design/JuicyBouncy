@@ -2,7 +2,7 @@
 <section class="card"><p class="eyebrow">Your item</p><h2 id="productName">Loading...</h2><p>Price: <strong id="productPrice">$0.00</strong></p></section>
 <section class="card"><form action="https://formsubmit.co/edgarlopezcoapio@gmail.com" method="POST">
 <input type="hidden" name="_subject" value="New Juicy Bouncy Order"><input type="hidden" name="_template" value="table"><input type="hidden" name="_captcha" value="false">
-<input type="hidden" name="_next" value="thanks.html">
+<input type="hidden" name="_next" id="paypalRedirect" value="thanks.html">
 <input type="hidden" id="productInput" name="Product"><input type="hidden" id="priceInput" name="Price">
 <label>Your name<input type="text" name="Name" required></label>
 <label>Your email<input type="email" name="Email" required></label>
@@ -10,14 +10,14 @@
 <button class="btn" type="submit">Send message</button></form></section>
 <script>
 const products = {
-      "Strawberry Cup": { price: "3.99", paypal: "" },
-      "Mango Cup": { price: "3.99", paypal: "" },
-      "Chocolate Cup": { price: "4.49", paypal: "" },
-      "Strawberry Share Cup": { price: "8.99", paypal: "" },
-      "Mango Share Cup": { price: "8.99", paypal: "" },
-      "Strawberry Party Mold": { price: "55.00", paypal: "" },
-      "Mango Party Mold": { price: "55.00", paypal: "" },
-      "Tres Leches Party Mold": { price: "65.00", paypal: "" }
+      "Strawberry Cup": { price: "3.99", paypal: "https://www.paypal.com/ncp/payment/JMHBG8QKJZ468" },
+      "Mango Cup": { price: "3.99", paypal: "https://www.paypal.com/ncp/payment/QFGP65LPRHV78" },
+      "Chocolate Cup": { price: "4.49", paypal: "https://www.paypal.com/ncp/payment/KAXFNXYZDDVLS" },
+      "Strawberry Share Cup": { price: "8.99", paypal: "https://www.paypal.com/ncp/payment/SX5CWZYTT4ZGY" },
+      "Mango Share Cup": { price: "8.99", paypal: "https://www.paypal.com/ncp/payment/KMN7777YDQERW" },
+      "Strawberry Party Mold": { price: "55.00", paypal: "https://www.paypal.com/ncp/payment/X3TKHVWKELETQ" },
+      "Mango Party Mold": { price: "55.00", paypal: "https://www.paypal.com/ncp/payment/L6BC5MR5RMLA6" },
+      "Tres Leches Party Mold": { price: "65.00", paypal: "https://www.paypal.com/ncp/payment/25R3SEGGN9GVL" }
 };
 const params = new URLSearchParams(window.location.search);
 const selectedProduct = params.get("product");
@@ -27,4 +27,5 @@ document.getElementById("productName").textContent = selectedProduct;
 document.getElementById("productPrice").textContent = "$" + product.price;
 document.getElementById("productInput").value = selectedProduct;
 document.getElementById("priceInput").value = "$" + product.price;
+if (product.paypal) { document.getElementById("paypalRedirect").value = product.paypal; }
 </script></main><footer class="footer"><a class="logo logo2" href="index.html">Juicy Bouncy</a><p>Little gelatinas made to bounce.</p><p>© <span class="year"></span> Juicy Bouncy</p></footer><script src="../script.js"></script></body></html>

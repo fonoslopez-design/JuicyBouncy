@@ -2,7 +2,7 @@
 <section class="card"><p class="eyebrow">Tu producto</p><h2 id="productName">Loading...</h2><p>Precio: <strong id="productPrice">$0.00</strong></p></section>
 <section class="card"><form action="https://formsubmit.co/edgarlopezcoapio@gmail.com" method="POST">
 <input type="hidden" name="_subject" value="New Juicy Bouncy Order"><input type="hidden" name="_template" value="table"><input type="hidden" name="_captcha" value="false">
-<input type="hidden" name="_next" value="thanks.html">
+<input type="hidden" name="_next" id="paypalRedirect" value="thanks.html">
 <input type="hidden" id="productInput" name="Product"><input type="hidden" id="priceInput" name="Price">
 <label>Tu nombre<input type="text" name="Name" required></label>
 <label>Tu correo<input type="email" name="Email" required></label>
@@ -10,14 +10,14 @@
 <button class="btn" type="submit">Enviar mensaje</button></form></section>
 <script>
 const products = {
-      "Vaso de Fresa": { price: "3.99", paypal: "" },
-      "Vaso de Mango": { price: "3.99", paypal: "" },
-      "Vaso de Chocolate": { price: "4.49", paypal: "" },
-      "Vaso Compartido de Fresa": { price: "8.99", paypal: "" },
-      "Vaso Compartido de Mango": { price: "8.99", paypal: "" },
-      "Molde de Fresa para Eventos": { price: "55.00", paypal: "" },
-      "Molde de Mango para Eventos": { price: "55.00", paypal: "" },
-      "Molde Tres Leches para Eventos": { price: "65.00", paypal: "" }
+      "Vaso de Fresa": { price: "3.99", paypal: "https://www.paypal.com/ncp/payment/JMHBG8QKJZ468" },
+      "Vaso de Mango": { price: "3.99", paypal: "https://www.paypal.com/ncp/payment/QFGP65LPRHV78" },
+      "Vaso de Chocolate": { price: "4.49", paypal: "https://www.paypal.com/ncp/payment/KAXFNXYZDDVLS" },
+      "Vaso Compartido de Fresa": { price: "8.99", paypal: "https://www.paypal.com/ncp/payment/SX5CWZYTT4ZGY" },
+      "Vaso Compartido de Mango": { price: "8.99", paypal: "https://www.paypal.com/ncp/payment/KMN7777YDQERW" },
+      "Molde de Fresa para Eventos": { price: "55.00", paypal: "https://www.paypal.com/ncp/payment/X3TKHVWKELETQ" },
+      "Molde de Mango para Eventos": { price: "55.00", paypal: "https://www.paypal.com/ncp/payment/L6BC5MR5RMLA6" },
+      "Molde Tres Leches para Eventos": { price: "65.00", paypal: "https://www.paypal.com/ncp/payment/25R3SEGGN9GVL" }
 };
 const params = new URLSearchParams(window.location.search);
 const selectedProduct = params.get("product");
@@ -27,4 +27,5 @@ document.getElementById("productName").textContent = selectedProduct;
 document.getElementById("productPrice").textContent = "$" + product.price;
 document.getElementById("productInput").value = selectedProduct;
 document.getElementById("priceInput").value = "$" + product.price;
+if (product.paypal) { document.getElementById("paypalRedirect").value = product.paypal; }
 </script></main><footer class="footer"><a class="logo logo2" href="index.html">Juicy Bouncy</a><p>Gelatinas pequeñas hechas para rebotar.</p><p>© <span class="year"></span> Juicy Bouncy</p></footer><script src="../script.js"></script></body></html>
