@@ -1,0 +1,31 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Juicy Bouncy - gelatinas in cups and molds / gelatinas en vaso y en molde"><title>Pedido en Tienda | Juicy Bouncy</title><link rel="stylesheet" href="../style.css"></head><body><header class="header"><a class="logo" href="index.html">Juicy Bouncy</a><nav><a href="index.html">Inicio</a><a href="shop.html">Tienda</a><a href="about.html">Nosotros</a><a href="contact.html">Contacto</a><a href="payments.html">Pagos</a><a href="../index.html">🌐 Español / English</a></nav></header><main><div class="page-title"><p class="eyebrow">JUICY BOUNCY</p><h1>Reserva tu Pedido</h1><p>Llena este formulario corto y tendremos tu pedido listo para pagar y recoger en tienda.</p></div>
+<section class="card"><p class="eyebrow">Tu Producto</p><h2 id="productName">Loading...</h2><p>Precio: <strong id="productPrice">$0.00</strong></p></section>
+<section class="card"><form action="https://formsubmit.co/edgarlopezcoapio@gmail.com" method="POST">
+<input type="hidden" name="_subject" value="New Juicy Bouncy In-Store Order"><input type="hidden" name="_template" value="table"><input type="hidden" name="_captcha" value="false">
+<input type="hidden" name="_next" value="thanks.html">
+<input type="hidden" id="productInput" name="Product"><input type="hidden" id="priceInput" name="Price">
+<label>Nombre completo *<input type="text" name="Full Name" required></label>
+<label>Teléfono *<input type="tel" name="Phone" required></label>
+<label>Correo<input type="email" name="Email"></label>
+<p><strong>Pago al recoger: puedes pagar en tienda con efectivo o tarjeta cuando recojas tu pedido.</strong></p>
+<button class="btn" type="submit">Reservar mi Pedido</button></form></section>
+<script>
+const products = {
+      "Vaso de Fresa": { price: "3.99", paypal: "https://www.paypal.com/ncp/payment/JMHBG8QKJZ468" },
+      "Vaso de Mango": { price: "3.99", paypal: "https://www.paypal.com/ncp/payment/QFGP65LPRHV78" },
+      "Vaso de Chocolate": { price: "4.49", paypal: "https://www.paypal.com/ncp/payment/KAXFNXYZDDVLS" },
+      "Vaso Compartido de Fresa": { price: "8.99", paypal: "https://www.paypal.com/ncp/payment/SX5CWZYTT4ZGY" },
+      "Vaso Compartido de Mango": { price: "8.99", paypal: "https://www.paypal.com/ncp/payment/KMN7777YDQERW" },
+      "Molde de Fresa para Eventos": { price: "55.00", paypal: "https://www.paypal.com/ncp/payment/X3TKHVWKELETQ" },
+      "Molde de Mango para Eventos": { price: "55.00", paypal: "https://www.paypal.com/ncp/payment/L6BC5MR5RMLA6" },
+      "Molde Tres Leches para Eventos": { price: "65.00", paypal: "https://www.paypal.com/ncp/payment/25R3SEGGN9GVL" }
+};
+const params = new URLSearchParams(window.location.search);
+const selectedProduct = params.get("product");
+if (!selectedProduct || !products[selectedProduct]) { window.location.href = "shop.html"; }
+const product = products[selectedProduct];
+document.getElementById("productName").textContent = selectedProduct;
+document.getElementById("productPrice").textContent = "$" + product.price;
+document.getElementById("productInput").value = selectedProduct;
+document.getElementById("priceInput").value = "$" + product.price;
+</script><footer class="footer"><a class="logo logo2" href="index.html">Juicy Bouncy</a><p>Gelatinas pequeñas hechas para rebotar.</p><p>© <span class="year"></span> Juicy Bouncy</p></footer><script src="../script.js"></script></body></html>

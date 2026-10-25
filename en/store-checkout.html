@@ -1,0 +1,31 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Juicy Bouncy - gelatinas in cups and molds / gelatinas en vaso y en molde"><title>In-Store Order | Juicy Bouncy</title><link rel="stylesheet" href="../style.css"></head><body><header class="header"><a class="logo" href="index.html">Juicy Bouncy</a><nav><a href="index.html">Home</a><a href="shop.html">Shop</a><a href="about.html">About</a><a href="contact.html">Contact</a><a href="payments.html">Payments</a><a href="../index.html">🌐 Español / English</a></nav></header><main><div class="page-title"><p class="eyebrow">JUICY BOUNCY</p><h1>Reserve Your Order</h1><p>Fill out this short form and we will have your order ready for payment and pickup in store.</p></div>
+<section class="card"><p class="eyebrow">Your Item</p><h2 id="productName">Loading...</h2><p>Price: <strong id="productPrice">$0.00</strong></p></section>
+<section class="card"><form action="https://formsubmit.co/edgarlopezcoapio@gmail.com" method="POST">
+<input type="hidden" name="_subject" value="New Juicy Bouncy In-Store Order"><input type="hidden" name="_template" value="table"><input type="hidden" name="_captcha" value="false">
+<input type="hidden" name="_next" value="thanks.html">
+<input type="hidden" id="productInput" name="Product"><input type="hidden" id="priceInput" name="Price">
+<label>Full Name *<input type="text" name="Full Name" required></label>
+<label>Phone Number *<input type="tel" name="Phone" required></label>
+<label>Email<input type="email" name="Email"></label>
+<p><strong>Payment at pickup: you can pay in store with cash or card when you pick up your order.</strong></p>
+<button class="btn" type="submit">Reserve My Order</button></form></section>
+<script>
+const products = {
+      "Strawberry Cup": { price: "3.99", paypal: "https://www.paypal.com/ncp/payment/JMHBG8QKJZ468" },
+      "Mango Cup": { price: "3.99", paypal: "https://www.paypal.com/ncp/payment/QFGP65LPRHV78" },
+      "Chocolate Cup": { price: "4.49", paypal: "https://www.paypal.com/ncp/payment/KAXFNXYZDDVLS" },
+      "Strawberry Share Cup": { price: "8.99", paypal: "https://www.paypal.com/ncp/payment/SX5CWZYTT4ZGY" },
+      "Mango Share Cup": { price: "8.99", paypal: "https://www.paypal.com/ncp/payment/KMN7777YDQERW" },
+      "Strawberry Party Mold": { price: "55.00", paypal: "https://www.paypal.com/ncp/payment/X3TKHVWKELETQ" },
+      "Mango Party Mold": { price: "55.00", paypal: "https://www.paypal.com/ncp/payment/L6BC5MR5RMLA6" },
+      "Tres Leches Party Mold": { price: "65.00", paypal: "https://www.paypal.com/ncp/payment/25R3SEGGN9GVL" }
+};
+const params = new URLSearchParams(window.location.search);
+const selectedProduct = params.get("product");
+if (!selectedProduct || !products[selectedProduct]) { window.location.href = "shop.html"; }
+const product = products[selectedProduct];
+document.getElementById("productName").textContent = selectedProduct;
+document.getElementById("productPrice").textContent = "$" + product.price;
+document.getElementById("productInput").value = selectedProduct;
+document.getElementById("priceInput").value = "$" + product.price;
+</script><footer class="footer"><a class="logo logo2" href="index.html">Juicy Bouncy</a><p>Little gelatinas made to bounce.</p><p>© <span class="year"></span> Juicy Bouncy</p></footer><script src="../script.js"></script></body></html>
