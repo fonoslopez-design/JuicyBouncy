@@ -1,4 +1,5 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Juicy Bouncy - gelatinas individuales y en molde"><title>Complete Your Order | Juicy Bouncy</title><link rel="stylesheet" href="../style.css"></head><body><header class="header"><a class="logo" href="index.html">Juicy Bouncy</a><nav><a href="index.html">Home</a><a href="shop.html">Shop</a><a href="about.html">About</a><a href="contact.html">Contact</a><a href="payments.html">Payments</a><a href="../index.html">🌐 Español / English</a></nav></header><main><div class="page-title"><p class="eyebrow">JUICY BOUNCY</p><h1>Complete Your Order</h1><p>Tell us where you would like your gelatin delivered.</p></div>
+<section class="card"><p class="eyebrow">Choose an option</p><div id="optionButtons" style="display:flex;flex-wrap:wrap;gap:8px"></div></section>
 <section class="card"><p class="eyebrow">Your item</p><h2 id="productName">Loading...</h2><p>Price: <strong id="productPrice">$0.00</strong></p></section>
 <section class="card"><form action="https://formsubmit.co/edgarlopezcoapio@gmail.com" method="POST">
 <input type="hidden" name="_subject" value="New Juicy Bouncy Order"><input type="hidden" name="_template" value="table"><input type="hidden" name="_captcha" value="false">
@@ -62,4 +63,23 @@ document.getElementById("productPrice").textContent = "$" + product.price;
 document.getElementById("productInput").value = selectedProduct;
 document.getElementById("priceInput").value = "$" + product.price;
 if (product.paypal) { document.getElementById("paypalRedirect").value = product.paypal; }
+// Option picker: the 4 variants of this flavor (individual/mold x online/in-store).
+(function () {
+  var base = selectedProduct.replace(/ Individual$/, "").replace(/ Mold$/, "");
+  var ind = base + " Individual", mold = base + " Mold";
+  var here = window.location.pathname.indexOf("store-checkout.html") !== -1 ? "store-checkout.html" : "checkout.html";
+  var opts = [
+    { page: "checkout.html", product: ind, label: "Individual \u00b7 Pay online $" + products[ind].price },
+    { page: "checkout.html", product: mold, label: "Mold \u00b7 Pay online $" + products[mold].price },
+    { page: "store-checkout.html", product: ind, label: "Individual \u00b7 Pay in store $" + products[ind].price },
+    { page: "store-checkout.html", product: mold, label: "Mold \u00b7 Pay in store $" + products[mold].price }
+  ];
+  var html = "";
+  opts.forEach(function (o) {
+    var cur = (o.page === here && o.product === selectedProduct);
+    html += '<a class="btn" href="' + o.page + '?product=' + encodeURIComponent(o.product) + '&price=' + products[o.product].price + '">' + (cur ? "\u2713 " : "") + o.label + '</a>';
+  });
+  document.getElementById("optionButtons").innerHTML = html;
+})();
+
 </script></main><footer class="footer"><a class="logo logo2" href="index.html">Juicy Bouncy</a><p>Gelatinas made to bounce.</p><p>© <span class="year"></span> Juicy Bouncy</p></footer><script src="../script.js"></script></body></html>
