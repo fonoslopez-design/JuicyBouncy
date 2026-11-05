@@ -1,15 +1,14 @@
 <!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Juicy Bouncy - gelatinas individuales y en molde"><title>Pedido en Tienda | Juicy Bouncy</title><link rel="stylesheet" href="../style.css"></head><body><header class="header"><a class="logo" href="index.html">Juicy Bouncy</a><nav><a href="index.html">Inicio</a><a href="shop.html">Tienda</a><a href="about.html">Nosotros</a><a href="contact.html">Contacto</a><a href="payments.html">Pagos</a><a href="../index.html">🌐 Español / English</a></nav></header><main><div class="page-title"><p class="eyebrow">JUICY BOUNCY</p><h1>Reserva tu Pedido</h1><p>Llena este formulario corto y tendremos tu pedido listo para pagar y recoger en tienda.</p></div>
 <section class="card"><p class="eyebrow">Elige una opción</p><div id="optionButtons" style="display:flex;flex-wrap:wrap;gap:8px"></div></section>
 <section class="card"><p class="eyebrow">Tu Producto</p><h2 id="productName">Loading...</h2><p>Precio: <strong id="productPrice">$0.00</strong></p></section>
-<section class="card"><form action="https://formsubmit.co/edgarlopezcoapio@gmail.com" method="POST">
-<input type="hidden" name="_subject" value="New Juicy Bouncy In-Store Order"><input type="hidden" name="_template" value="table"><input type="hidden" name="_captcha" value="false">
-<input type="hidden" name="_next" value="https://juicybouncy.com/es/thanks.html">
+<section class="card"><form action="https://api.web3forms.com/submit" method="POST">
+<input type="hidden" name="access_key" value="cb584b4d-136d-47a4-8c19-438615357c81"><input type="hidden" name="subject" value="New Juicy Bouncy In-Store Order"><input type="checkbox" name="botcheck" class="hidden" style="display: none;"><input type="hidden" name="redirect" value="https://juicybouncy.com/es/thanks.html">
 <input type="hidden" id="productInput" name="Product"><input type="hidden" id="priceInput" name="Price">
 <label>Nombre completo *<input type="text" name="Full Name" required></label>
 <label>Teléfono *<input type="tel" name="Phone" required></label>
 <label>Correo<input type="email" name="Email"></label>
 <p><strong>Pago al recoger: puedes pagar en tienda con efectivo o tarjeta cuando recojas tu pedido.</strong></p>
-<button class="btn" type="submit">Reservar mi Pedido</button></form></section>
+<button class="btn" type="submit">Reservar mi pedido</button></form></section>
 <script>
 const products = {
       "Mosaico Individual": { price: "3.99", paypal: "" },
@@ -97,5 +96,4 @@ document.getElementById("priceInput").value = "$" + product.price;
   });
   document.getElementById("optionButtons").innerHTML = html;
 })();
-
 </script><footer class="footer"><a class="logo logo2" href="index.html">Juicy Bouncy</a><p>Gelatinas hechas para rebotar.</p><p>© <span class="year"></span> Juicy Bouncy</p></footer><script src="../script.js"></script></body></html>
