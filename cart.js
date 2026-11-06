@@ -93,8 +93,10 @@
     });
   }
 
-  /* Cart checkout form: fills hidden Web3Forms fields, sets the redirect
-     (PayPal with the cart total for online, thanks page for in-store). */
+  /* Cart checkout form: fills hidden Web3Forms fields, sends the order with
+     fetch (Web3Forms does not redirect to external PayPal URLs on a plain
+     form post), then navigates: PayPal with the cart total for online,
+     thanks page for in-store. */
   function setupCheckout() {
     var form = document.getElementById("cart-form");
     if (!form) return;
@@ -102,7 +104,6 @@
     var addrWrap = document.getElementById("cart-address-wrap");
     var addrInput = document.getElementById("cart-address");
     var submitBtn = document.getElementById("cart-submit");
-    var redirect = document.getElementById("cart-redirect");
     function current() { return (form.querySelector('input[name="fulfill"]:checked') || {}).value || "online"; }
     function refresh() {
       var online = current() === "online";
@@ -114,7 +115,8 @@
     }
     form.querySelectorAll('input[name="fulfill"]').forEach(function (r) { r.addEventListener("change", refresh); });
     refresh();
-    form.addEventListener("submit", function () {
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
       var cart = load();
       if (!cart.length) return;
       var online = current() === "online";
@@ -123,7 +125,21 @@
       document.getElementById("cart-fulfill").value = online
         ? (l === "en" ? "Online (PayPal)" : "En l\u00ednea (PayPal)")
         : (l === "en" ? "In store" : "En tienda");
-      if (redirect) redirect.value = online ? paypalUrl(cart) : "https://juicybouncy.com/" + l + "/thanks.html";
+      submitBtn.disabled = true;
+      submitBtn.textContent = l === "en" ? "Sending..." : "Enviando...";
+      fetch(form.action, { method: "POST", body: new FormData(form), headers: { "Accept": "application/json" } })
+        .then(function (r) { return r.json(); })
+        .then(function (res) {
+          if (res && res.success) {
+            window.location.href = online ? paypalUrl(cart) : "https://juicybouncy.com/" + l + "/thanks.html";
+          } else { throw new Error("submit failed"); }
+        })
+        .catch(function () {
+          submitBtn.disabled = false;
+          refresh();
+          var err = document.getElementById("cart-error");
+          if (err) err.style.display = "";
+        });
     });
   }
 
