@@ -45,7 +45,7 @@
       currency_code: "USD",
       no_shipping: "1",
       custom: itemsText(cart).slice(0, 200),
-      return: "https://juicybouncy.com/" + l + "/thanks.html",
+      return: "https://juicybouncy.com/" + l + "/cart.html?paid=1",
       cancel_return: "https://juicybouncy.com/" + l + "/cart.html"
     });
     return "https://www.paypal.com/cgi-bin/webscr?" + p.toString();
@@ -65,6 +65,7 @@
       if (empty) empty.style.display = "";
       if (formWrap) formWrap.style.display = "none";
       if (totalEl) totalEl.textContent = money(0);
+      refreshCheckout();
       return;
     }
     if (empty) empty.style.display = "none";
@@ -91,63 +92,75 @@
         save(c); updateBadges(); renderCart();
       });
     });
+    refreshCheckout();
   }
 
-  /* Cart checkout form: fills hidden Web3Forms fields, sends the order with
-     fetch (Web3Forms does not redirect to external PayPal URLs on a plain
-     form post), then navigates: PayPal with the cart total for online,
-     thanks page for in-store. */
+  /* Cart checkout, pay-first flow (Edgar 2026-11-06): the customer pays on
+     PayPal first, then fills the order form. The paid state is remembered
+     in localStorage as the paid total, so adding items afterwards asks for
+     payment again. The form posts to Web3Forms normally (redirect to the
+     thanks page, same as the single-product checkout). */
+  var PATH = "online"; /* "online" (paid with PayPal) or "store" (pay in store) */
+  function paidTotal() { try { var v = localStorage.getItem("jb-paid-total"); return v === null ? -1 : +v; } catch (e) { return -1; } }
+  function isPaid(cart) { var t = cartTotal(cart); return t > 0 && paidTotal() === t; }
+
+  function fillHidden() {
+    var cart = load();
+    var p = document.getElementById("cart-product");
+    var t = document.getElementById("cart-total-input");
+    var f = document.getElementById("cart-fulfill");
+    if (p) p.value = itemsText(cart);
+    if (t) t.value = money(cartTotal(cart));
+    if (f) f.value = PATH === "store"
+      ? (lang() === "en" ? "In store" : "En tienda")
+      : (lang() === "en" ? "Online (PayPal)" : "En línea (PayPal)");
+  }
+
+  function refreshCheckout() {
+    var cart = load();
+    var paySec = document.getElementById("cart-pay");
+    var formSec = document.getElementById("cart-checkout");
+    var paidNote = document.getElementById("cart-paid-note");
+    var addrWrap = document.getElementById("cart-address-wrap");
+    var addrInput = document.getElementById("cart-address");
+    if (!cart.length) { if (paySec) paySec.style.display = "none"; if (formSec) formSec.style.display = "none"; return; }
+    var paid = isPaid(cart);
+    var showForm = paid || PATH === "store";
+    if (paySec) paySec.style.display = showForm ? "none" : "";
+    if (formSec) formSec.style.display = showForm ? "" : "none";
+    if (paidNote) paidNote.style.display = paid ? "" : "none";
+    var online = PATH !== "store";
+    if (addrWrap) addrWrap.style.display = online ? "" : "none";
+    if (addrInput) addrInput.required = online;
+    fillHidden();
+  }
+
   function setupCheckout() {
     var form = document.getElementById("cart-form");
     if (!form) return;
-    var l = lang();
-    var addrWrap = document.getElementById("cart-address-wrap");
-    var addrInput = document.getElementById("cart-address");
-    var submitBtn = document.getElementById("cart-submit");
-    function current() { return (form.querySelector('input[name="fulfill"]:checked') || {}).value || "online"; }
-    function refresh() {
-      var online = current() === "online";
-      if (addrWrap) addrWrap.style.display = online ? "" : "none";
-      if (addrInput) addrInput.required = online;
-      if (submitBtn) submitBtn.textContent = online
-        ? (l === "en" ? "Complete order and pay with PayPal" : "Completar pedido y pagar con PayPal")
-        : (l === "en" ? "Send in-store order" : "Enviar pedido en tienda");
+    /* Back from PayPal after a payment: remember the paid total. */
+    var params = new URLSearchParams(location.search);
+    if (params.get("paid") === "1") {
+      try { localStorage.setItem("jb-paid-total", String(cartTotal(load()))); } catch (e) {}
+      try { history.replaceState(null, "", location.pathname); } catch (e) {}
     }
-    form.querySelectorAll('input[name="fulfill"]').forEach(function (r) { r.addEventListener("change", refresh); });
-    refresh();
-    form.addEventListener("submit", function (e) {
-      e.preventDefault();
+    var payBtn = document.getElementById("pay-paypal");
+    if (payBtn) payBtn.addEventListener("click", function () {
       var cart = load();
-      if (!cart.length) return;
-      var online = current() === "online";
-      document.getElementById("cart-product").value = itemsText(cart);
-      document.getElementById("cart-total-input").value = money(cartTotal(cart));
-      document.getElementById("cart-fulfill").value = online
-        ? (l === "en" ? "Online (PayPal)" : "En l\u00ednea (PayPal)")
-        : (l === "en" ? "In store" : "En tienda");
-      submitBtn.disabled = true;
-      submitBtn.textContent = l === "en" ? "Sending..." : "Enviando...";
-      fetch(form.action, { method: "POST", body: new FormData(form), headers: { "Accept": "application/json" } })
-        .then(function (r) { return r.json(); })
-        .then(function (res) {
-          if (res && res.success) {
-            window.location.href = online ? paypalUrl(cart) : "https://juicybouncy.com/" + l + "/thanks.html";
-          } else { throw new Error("submit failed"); }
-        })
-        .catch(function () {
-          submitBtn.disabled = false;
-          refresh();
-          var err = document.getElementById("cart-error");
-          if (err) err.style.display = "";
-        });
+      if (cart.length) window.location.href = paypalUrl(cart);
     });
+    var storeBtn = document.getElementById("pay-store");
+    if (storeBtn) storeBtn.addEventListener("click", function () { PATH = "store"; refreshCheckout(); });
+    form.addEventListener("submit", function () { fillHidden(); });
+    refreshCheckout();
   }
 
   window.JB = { add: add, updateBadges: updateBadges };
   document.addEventListener("DOMContentLoaded", function () {
-    /* Order completed (thanks page): clear the cart. Cancelling on PayPal
-       returns to cart.html instead, so the cart stays intact there. */
-    if (/thanks\.html$/.test(location.pathname)) save([]);
+    /* Order completed (thanks page): clear the cart and the paid flag.
+       Cancelling on PayPal returns to cart.html instead, so the cart
+       stays intact there. */
+    if (/thanks\.html$/.test(location.pathname)) { save([]); try { localStorage.removeItem("jb-paid-total"); } catch (e) {} }
     updateBadges(); renderCart(); setupCheckout();
   });
 })();
