@@ -180,13 +180,28 @@
     var addrWrap = document.getElementById("cart-address-wrap");
     var addrInput = document.getElementById("cart-address");
     var submitBtn = document.getElementById("cart-submit");
-    /* Warning before the charge: two PayPal payments (and two orders) when
-       the cart has both sizes; one charge when it has only one size. */
+    /* Warning before the charge: the number of electronic payments comes
+       from the payment chain (Edgar 2026-11-08) — one step per link, so a
+       big cart splits into more payments. Split charges are explained as
+       fraud prevention. One step = the single-payment line. */
     var note = document.getElementById("cart-pay-note");
     if (note) {
-      var hasInd = false, hasMold = false;
-      cart.forEach(function (it) { if (it.size === "individual") hasInd = true; else hasMold = true; });
-      note.textContent = (hasInd && hasMold) ? note.getAttribute("data-both") : note.getAttribute("data-single");
+      var steps = buildChain(cart);
+      var n = steps.length, indSteps = 0, moldSteps = 0;
+      steps.forEach(function (s) { if (s.kind === "individual") indSteps++; else moldSteps++; });
+      if (n <= 1) {
+        note.textContent = note.getAttribute("data-single");
+      } else if (lang() === "en") {
+        var textEn = "Heads up: online, your order is charged in " + n + " electronic payments";
+        if (indSteps && moldSteps) textEn += " — " + indSteps + " for the Individual items and " + moldSteps + " for the Mold items";
+        textEn += ". They are " + n + " separate orders. Payments are split to prevent fraud. In store you pay for everything together.";
+        note.textContent = textEn;
+      } else {
+        var textEs = "Atención: en línea, tu pedido se cobra en " + n + " pagos electrónicos";
+        if (indSteps && moldSteps) textEs += " — " + indSteps + " por los individuales y " + moldSteps + " por los moldes";
+        textEs += ". Son " + n + " pedidos diferentes. Se hacen cobros diferidos para evitar fraudes. En tienda pagas todo junto.";
+        note.textContent = textEs;
+      }
     }
     if (!cart.length) { [paySec, formSec, stepsSec].forEach(function (el) { if (el) el.style.display = "none"; }); return; }
     /* Cart changed after starting a payment chain: drop the stale chain
