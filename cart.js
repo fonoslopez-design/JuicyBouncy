@@ -1,8 +1,8 @@
-/* Juicy Bouncy cart: localStorage cart, single PayPal payment (_xclick). */
+/* Juicy Bouncy cart: localStorage cart, pay-first checkout with Edgar's PayPal payment links. */
 (function () {
   var CATALOG = {"mosaico": {"en": "Mosaic", "es": "Mosaico"}, "vainilla-espumosa": {"en": "Foamy Vanilla", "es": "Espumosa de Vainilla"}, "pina-cremosa": {"en": "Creamy Pineapple", "es": "Piña Cremosa"}, "fresas-crema": {"en": "Strawberries and Cream", "es": "Fresas con Crema"}, "tresleches-platano": {"en": "Tres Leches with Banana", "es": "Tres Leches con Plátano"}, "tresleches-manzana": {"en": "Tres Leches with Apple", "es": "Tres Leches con Manzana"}, "durazno-queso": {"en": "Peach and Cheese", "es": "Durazno con Queso"}, "limon-lechera": {"en": "Lime and Condensed Milk", "es": "Limón y Lechera"}, "queso-crema": {"en": "Cream Cheese", "es": "Queso Crema"}, "mosaico-naranja": {"en": "Orange Mosaic", "es": "Mosaico de Naranja"}, "mosaico-limonada": {"en": "Lemonade Mosaic", "es": "Mosaico de Limonada"}, "calabaza-tresleches": {"en": "Pumpkin Tres Leches", "es": "Calabaza Tres Leches"}, "pay-limon": {"en": "Lime Pie Gelatin", "es": "Pay de Limón"}, "rompope": {"en": "Rompope", "es": "Rompope"}, "lechera": {"en": "Condensed Milk", "es": "Lechera"}, "mango-leche": {"en": "Mango and Condensed Milk", "es": "Mango con Leche Condensada"}, "queso-marias": {"en": "Cheese and Maria Cookies", "es": "Queso con Galletas Marías"}, "frutas-queso": {"en": "Fruit and Cream Cheese", "es": "Frutas con Queso Crema"}, "limonada-rosa": {"en": "Pink Lemonade", "es": "Limonada Rosa"}, "chocolate-leche": {"en": "Chocolate Milk", "es": "Chocolate con Leche"}, "mosaico-patrio": {"en": "Trio", "es": "Trío"}, "flan-napolitano": {"en": "Flan Napolitano", "es": "Flan Napolitano"}, "chocoflan": {"en": "Chocoflan", "es": "Pastel Imposible"}, "flan-maizena": {"en": "Cornstarch Flan", "es": "Flan de Maizena"}, "flan-queso-crema": {"en": "Flan with Cream Cheese", "es": "Flan con Queso Crema"}, "flan-sin-huevo": {"en": "Eggless Flan", "es": "Flan sin Huevo"}, "flan-maizena-canela": {"en": "Cinnamon Cornstarch Flan", "es": "Flan de Maizena con Canela"}, "flan-caramelo": {"en": "Caramel Flan", "es": "Flan con Caramelo"}, "jericalla": {"en": "Jericalla", "es": "Jericalla"}};
+  var LINKS = {"individual": ["https://www.paypal.com/ncp/payment/4B87H99QJGAM8", "https://www.paypal.com/ncp/payment/B8LC28FNBPJKA", "https://www.paypal.com/ncp/payment/3FYRAFV4P73U8", "https://www.paypal.com/ncp/payment/PZSDGLMGAL9HL", "https://www.paypal.com/ncp/payment/PCWN6XPT5FAF6", "https://www.paypal.com/ncp/payment/87Y9XVQZJXE6J", "https://www.paypal.com/ncp/payment/MYRQPHF98U4Y4", "https://www.paypal.com/ncp/payment/AP9847Q6CVR2Q", "https://www.paypal.com/ncp/payment/6EKT54NSYESWL", "https://www.paypal.com/ncp/payment/TQ6HK84RQPK98"], "mold": ["https://www.paypal.com/ncp/payment/DN7SEZ8KW2FEA", "https://www.paypal.com/ncp/payment/XJMTFXG6HLXW2", "https://www.paypal.com/ncp/payment/KP7YHHT3ZAXVE", "https://www.paypal.com/ncp/payment/FST6DTAM6H6WN", "https://www.paypal.com/ncp/payment/NN64QM5UA7AY6"]}; /* Edgar's PayPal payment links: individual[0..9], mold[0..4] */
   var PRICE = { individual: 399, mold: 3000 }; /* cents, USD */
-  var PAYPAL_EMAIL = "tamarindongo10@gmail.com";
   var KEY = "jb-cart-v1";
 
   function lang() { return (document.documentElement.lang || "es").slice(0, 2) === "en" ? "en" : "es"; }
@@ -34,22 +34,28 @@
     }
   }
 
-  function paypalUrl(cart) {
-    var total = (cartTotal(cart) / 100).toFixed(2);
-    var l = lang();
-    var p = new URLSearchParams({
-      cmd: "_xclick",
-      business: PAYPAL_EMAIL,
-      item_name: l === "en" ? "Juicy Bouncy - Online order" : "Juicy Bouncy - Pedido en l\u00ednea",
-      amount: total,
-      currency_code: "USD",
-      no_shipping: "1",
-      custom: itemsText(cart).slice(0, 200),
-      return: "https://juicybouncy.com/" + l + "/cart.html?paid=1",
-      cancel_return: "https://juicybouncy.com/" + l + "/cart.html"
-    });
-    return "https://www.paypal.com/cgi-bin/webscr?" + p.toString();
+  /* "Comprar" on a shop card: add 1 Individual of that flavor and go to
+     the cart page (Edgar 2026-11-06). */
+  function buyNow(slug) {
+    add(slug, "individual", null);
+    window.location.href = "cart.html";
   }
+
+  /* Payment chain from Edgar's PayPal links: individuals first (link matching
+     the individual count), then molds (link matching the mold count). Counts
+     above the links are split into several link payments. */
+  function buildChain(cart) {
+    var steps = [];
+    var ind = 0, mold = 0;
+    cart.forEach(function (it) { if (it.size === "individual") ind += it.qty; else mold += it.qty; });
+    var n = ind;
+    while (n > 0) { var q = Math.min(n, LINKS.individual.length); steps.push({ kind: "individual", qty: q, url: LINKS.individual[q - 1], amount: q * PRICE.individual }); n -= q; }
+    n = mold;
+    while (n > 0) { var q2 = Math.min(n, LINKS.mold.length); steps.push({ kind: "mold", qty: q2, url: LINKS.mold[q2 - 1], amount: q2 * PRICE.mold }); n -= q2; }
+    return steps;
+  }
+  function loadChain() { try { var c = JSON.parse(localStorage.getItem("jb-pay-chain")); return c && Array.isArray(c.steps) ? c : null; } catch (e) { return null; } }
+  function saveChain(c) { try { if (c) localStorage.setItem("jb-pay-chain", JSON.stringify(c)); else localStorage.removeItem("jb-pay-chain"); } catch (e) {} }
 
   /* Cart page rendering (only runs on cart.html). */
   function renderCart() {
@@ -95,14 +101,39 @@
     refreshCheckout();
   }
 
-  /* Cart checkout, pay-first flow (Edgar 2026-11-06): the customer pays on
-     PayPal first, then fills the order form. The paid state is remembered
-     in localStorage as the paid total, so adding items afterwards asks for
-     payment again. The form posts to Web3Forms normally (redirect to the
-     thanks page, same as the single-product checkout). */
-  var PATH = "online"; /* "online" (paid with PayPal) or "store" (pay in store) */
-  function paidTotal() { try { var v = localStorage.getItem("jb-paid-total"); return v === null ? -1 : +v; } catch (e) { return -1; } }
-  function isPaid(cart) { var t = cartTotal(cart); return t > 0 && paidTotal() === t; }
+  /* Cart checkout (Edgar 2026-11-06): the order form appears BEFORE PayPal
+     for online buyers — they fill their details, then pay the PayPal link(s),
+     and only then the order is sent to Web3Forms (so no unpaid order email).
+     In-store buyers fill the same form and it posts right away (no payment).
+     The filled form is saved to localStorage, so a reload mid-payment does
+     not lose it; the payment chain is dropped if the cart changes. */
+  function loadPath() { try { var p = localStorage.getItem("jb-pay-path"); return p === "store" ? "store" : "online"; } catch (e) { return "online"; } }
+  function savePath(p) { try { localStorage.setItem("jb-pay-path", p); } catch (e) {} }
+  function formOpen() { try { return localStorage.getItem("jb-form-open") === "1"; } catch (e) { return false; } }
+  function setFormOpen(v) { try { if (v) localStorage.setItem("jb-form-open", "1"); else localStorage.removeItem("jb-form-open"); } catch (e) {} }
+  var PATH = loadPath(); /* "online" (PayPal) or "store" (pay in store) */
+
+  function saveFormData() {
+    var form = document.getElementById("cart-form");
+    if (!form) return;
+    var d = {};
+    ["Name", "Email", "Phone", "Address", "Message"].forEach(function (n) {
+      var el = form.querySelector('[name="' + n + '"]');
+      if (el) d[n] = el.value;
+    });
+    try { localStorage.setItem("jb-order-form", JSON.stringify(d)); } catch (e) {}
+  }
+  function restoreFormData() {
+    var form = document.getElementById("cart-form");
+    if (!form) return;
+    var d = null;
+    try { d = JSON.parse(localStorage.getItem("jb-order-form")); } catch (e) {}
+    if (!d) return;
+    Object.keys(d).forEach(function (n) {
+      var el = form.querySelector('[name="' + n + '"]');
+      if (el && d[n] !== undefined) el.value = d[n];
+    });
+  }
 
   function fillHidden() {
     var cart = load();
@@ -116,51 +147,122 @@
       : (lang() === "en" ? "Online (PayPal)" : "En línea (PayPal)");
   }
 
+  function stepText(step, index, total) {
+    var l = lang();
+    var word = l === "en" ? "Step" : "Paso";
+    var of = l === "en" ? "of" : "de";
+    return word + " " + (index + 1) + " " + of + " " + total + " — " + (l === "en" ? "Pay " : "Paga ") + money(step.amount) + " (" + step.qty + " " + sizeName(step.kind) + ")";
+  }
+
+  function renderStep(cs) {
+    var l = lang();
+    var text = document.getElementById("cart-step-text");
+    var pay = document.getElementById("cart-step-pay");
+    var done = document.getElementById("cart-step-done");
+    if (text) text.textContent = stepText(cs.step, cs.chain.index, cs.chain.steps.length);
+    if (pay) {
+      if (cs.step.url) {
+        pay.textContent = (l === "en" ? "Pay " : "Pagar ") + money(cs.step.amount) + (l === "en" ? " with PayPal" : " con PayPal");
+        pay.href = cs.step.url;
+      } else {
+        pay.textContent = l === "en" ? "PayPal link pending" : "Link de PayPal pendiente";
+        pay.removeAttribute("href");
+      }
+    }
+    if (done) done.style.display = cs.step.url ? "" : "none";
+  }
+
   function refreshCheckout() {
     var cart = load();
     var paySec = document.getElementById("cart-pay");
     var formSec = document.getElementById("cart-checkout");
-    var paidNote = document.getElementById("cart-paid-note");
+    var stepsSec = document.getElementById("cart-steps");
     var addrWrap = document.getElementById("cart-address-wrap");
     var addrInput = document.getElementById("cart-address");
-    if (!cart.length) { if (paySec) paySec.style.display = "none"; if (formSec) formSec.style.display = "none"; return; }
-    var paid = isPaid(cart);
-    var showForm = paid || PATH === "store";
-    if (paySec) paySec.style.display = showForm ? "none" : "";
-    if (formSec) formSec.style.display = showForm ? "" : "none";
-    if (paidNote) paidNote.style.display = paid ? "" : "none";
+    var submitBtn = document.getElementById("cart-submit");
+    /* Warning before the charge: two PayPal payments (and two orders) when
+       the cart has both sizes; one charge when it has only one size. */
+    var note = document.getElementById("cart-pay-note");
+    if (note) {
+      var hasInd = false, hasMold = false;
+      cart.forEach(function (it) { if (it.size === "individual") hasInd = true; else hasMold = true; });
+      note.textContent = (hasInd && hasMold) ? note.getAttribute("data-both") : note.getAttribute("data-single");
+    }
+    if (!cart.length) { [paySec, formSec, stepsSec].forEach(function (el) { if (el) el.style.display = "none"; }); return; }
+    /* Cart changed after starting a payment chain: drop the stale chain
+       (the saved form data stays — the typed details are still valid). */
+    var ch = loadChain();
+    if (ch && ch.total !== cartTotal(cart)) { saveChain(null); ch = null; }
+    var cs = ch && ch.index < ch.steps.length ? { chain: ch, step: ch.steps[ch.index] } : null;
+    var showForm = PATH === "store" || (PATH === "online" && formOpen());
+    if (paySec) paySec.style.display = (!showForm && !cs) ? "" : "none";
+    if (formSec) formSec.style.display = (showForm && !cs) ? "" : "none";
+    if (stepsSec) stepsSec.style.display = cs ? "" : "none";
     var online = PATH !== "store";
     if (addrWrap) addrWrap.style.display = online ? "" : "none";
     if (addrInput) addrInput.required = online;
+    if (submitBtn) submitBtn.textContent = online ? submitBtn.getAttribute("data-online") : submitBtn.getAttribute("data-store");
+    if (cs) renderStep(cs);
     fillHidden();
   }
 
   function setupCheckout() {
     var form = document.getElementById("cart-form");
     if (!form) return;
-    /* Back from PayPal after a payment: remember the paid total. */
-    var params = new URLSearchParams(location.search);
-    if (params.get("paid") === "1") {
-      try { localStorage.setItem("jb-paid-total", String(cartTotal(load()))); } catch (e) {}
-      try { history.replaceState(null, "", location.pathname); } catch (e) {}
-    }
+    restoreFormData();
+    form.addEventListener("input", function () { saveFormData(); });
     var payBtn = document.getElementById("pay-paypal");
     if (payBtn) payBtn.addEventListener("click", function () {
       var cart = load();
-      if (cart.length) window.location.href = paypalUrl(cart);
+      if (!cart.length) return;
+      PATH = "online"; savePath(PATH); setFormOpen(true);
+      refreshCheckout();
     });
     var storeBtn = document.getElementById("pay-store");
-    if (storeBtn) storeBtn.addEventListener("click", function () { PATH = "store"; refreshCheckout(); });
-    form.addEventListener("submit", function () { fillHidden(); });
+    if (storeBtn) storeBtn.addEventListener("click", function () {
+      PATH = "store"; savePath(PATH); setFormOpen(true);
+      refreshCheckout();
+    });
+    document.querySelectorAll(".cart-back").forEach(function (b) {
+      b.addEventListener("click", function () {
+        saveChain(null); setFormOpen(false); PATH = "online"; savePath(PATH);
+        refreshCheckout();
+      });
+    });
+    var doneBtn = document.getElementById("cart-step-done");
+    if (doneBtn) doneBtn.addEventListener("click", function () {
+      var c = loadChain();
+      if (!c) return;
+      c.index += 1;
+      if (c.index >= c.steps.length) {
+        saveChain(null);
+        restoreFormData();
+        fillHidden();
+        form.submit(); /* normal POST to Web3Forms -> thanks page */
+      } else { saveChain(c); refreshCheckout(); }
+    });
+    form.addEventListener("submit", function (e) {
+      fillHidden();
+      if (PATH === "store") return; /* normal POST to Web3Forms */
+      e.preventDefault();
+      var cart = load();
+      if (!cart.length) return;
+      saveFormData();
+      var steps = buildChain(cart);
+      if (!steps.length) return;
+      saveChain({ steps: steps, index: 0, total: cartTotal(cart) });
+      refreshCheckout();
+      if (steps[0].url) window.open(steps[0].url, "_blank");
+    });
     refreshCheckout();
   }
 
-  window.JB = { add: add, updateBadges: updateBadges };
+  window.JB = { add: add, buyNow: buyNow, updateBadges: updateBadges };
   document.addEventListener("DOMContentLoaded", function () {
-    /* Order completed (thanks page): clear the cart and the paid flag.
-       Cancelling on PayPal returns to cart.html instead, so the cart
-       stays intact there. */
-    if (/thanks\.html$/.test(location.pathname)) { save([]); try { localStorage.removeItem("jb-paid-total"); } catch (e) {} }
+    /* Order completed (thanks page): clear the cart and all checkout state.
+       Cancelling on PayPal leaves the cart intact, since the links open in
+       a new tab and the cart page stays open. */
+    if (/thanks\.html$/.test(location.pathname)) { save([]); try { localStorage.removeItem("jb-paid-total"); localStorage.removeItem("jb-pay-chain"); localStorage.removeItem("jb-order-form"); localStorage.removeItem("jb-pay-path"); localStorage.removeItem("jb-form-open"); } catch (e) {} }
     updateBadges(); renderCart(); setupCheckout();
   });
 })();
