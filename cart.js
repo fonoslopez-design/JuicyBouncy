@@ -144,7 +144,7 @@
     if (t) t.value = money(cartTotal(cart));
     if (f) f.value = PATH === "store"
       ? (lang() === "en" ? "In store" : "En tienda")
-      : (lang() === "en" ? "Online (PayPal)" : "En línea (PayPal)");
+      : (lang() === "en" ? "Online (electronic payment)" : "En línea (pago electrónico)");
   }
 
   function stepText(step, index, total) {
@@ -162,10 +162,10 @@
     if (text) text.textContent = stepText(cs.step, cs.chain.index, cs.chain.steps.length);
     if (pay) {
       if (cs.step.url) {
-        pay.textContent = (l === "en" ? "Pay " : "Pagar ") + money(cs.step.amount) + (l === "en" ? " with PayPal" : " con PayPal");
+        pay.textContent = (l === "en" ? "Pay " : "Pagar ") + money(cs.step.amount) + (l === "en" ? " with electronic payment" : " con pago electrónico");
         pay.href = cs.step.url;
       } else {
-        pay.textContent = l === "en" ? "PayPal link pending" : "Link de PayPal pendiente";
+        pay.textContent = l === "en" ? "Electronic payment link pending" : "Link de pago electrónico pendiente";
         pay.removeAttribute("href");
       }
     }
